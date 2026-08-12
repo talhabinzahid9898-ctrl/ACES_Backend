@@ -4,28 +4,111 @@ const path = require("path");
 const app = express();
 const PORT = 3000;
 
-const healthRoutes = require("./routes/healthRoutes");
+const healthRoutes = require("./Routes/healthRoutes");
+const serviceRoute = require("./Routes/serviceRoute");
 
-// Middleware
+const { connectDB } = require("./config/db");
+
+
+// ==========================================
+// MIDDLEWARE
+// ==========================================
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve frontend
-app.use(express.static(path.join(__dirname, "../html")));
 
-// API routes
+// ==========================================
+// PUBLIC WEBSITE
+// ==========================================
+
+app.use(
+    express.static(
+        path.join(__dirname, "../html")
+    )
+);
+
+
+// ==========================================
+// ADMIN PANEL
+// ==========================================
+
+app.use(
+    "/admin",
+    express.static(
+        path.join(__dirname, "../Admin_Pannel")
+    )
+);
+
+
+// ==========================================
+// API ROUTES
+// ==========================================
+
 app.use("/api", healthRoutes);
+app.use("/api", serviceRoute);
 
-// Home page
+
+// ==========================================
+// PUBLIC HOME PAGE
+// ==========================================
+
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "../html", "index.html"));
+
+    res.sendFile(
+        path.join(
+            __dirname,
+            "../html",
+            "index.html"
+        )
+    );
+
 });
 
-const { connectDB } = require("./config/db");
-connectDB();
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+// ==========================================
+// ADMIN HOME PAGE
+// ==========================================
+
+app.get("/admin", (req, res) => {
+
+    res.sendFile(
+        path.join(
+            __dirname,
+            "../Admin_Pannel",
+            "dashboard.html"
+        )
+    );
+
 });
 
+
+// ==========================================
+// START SERVER
+// ==========================================
+
+const startServer = async () => {
+
+    try {
+
+        await connectDB();
+
+        app.listen(PORT, () => {
+
+            console.log(
+                `🚀 Server running on http://localhost:${PORT}`
+            );
+
+        });
+
+    } catch (error) {
+
+        console.error(
+            "❌ Server could not start."
+        );
+
+    }
+
+};
+
+startServer();

@@ -14,14 +14,37 @@ const config = {
     }
 };
 
+let pool;
+
 async function connectDB() {
     try {
-        await sql.connect(config);
+
+        pool = await sql.connect(config);
+
         console.log("✅ SQL Server Connected Successfully");
+
+        return pool;
+
     } catch (err) {
+
         console.error("❌ Database Connection Failed");
         console.error(err);
+
+        throw err;
     }
 }
 
-module.exports = { connectDB, sql };
+function getPool() {
+
+    if (!pool) {
+        throw new Error("Database pool is not connected.");
+    }
+
+    return pool;
+}
+
+module.exports = {
+    connectDB,
+    getPool,
+    sql
+};
