@@ -20,10 +20,13 @@
   },
   "homepage": "https://github.com/talhabinzahid9898-ctrl/ACES#readme",
   "dependencies": {
+    "cloudinary": "^2.10.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "mssql": "^12.7.0",
-    "mysql2": "^3.23.2"
+    "multer": "^2.2.0",
+    "mysql2": "^3.23.2",
+    "streamifier": "^0.1.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
