@@ -1,21 +1,33 @@
+"use strict";
+
 const express = require("express");
+const cors = require("cors");
 const path = require("path");
+require("dotenv").config();
+
+const { connectDB } = require("./config/db");
+
+const healthRoutes = require("./Routes/healthRoutes");
+const serviceRoutes = require("./Routes/serviceRoute");
+const teamRoutes = require("./Routes/teamRoutes");
+const blogRoutes = require("./Routes/blogRoutes");
+const dashboardRoutes = require("./Routes/dashboardRoutes");
 
 const app = express();
 const PORT = 3000;
-
-const healthRoutes = require("./Routes/healthRoutes");
-const serviceRoute = require("./Routes/serviceRoute");
-
-const { connectDB } = require("./config/db");
 
 
 // ==========================================
 // MIDDLEWARE
 // ==========================================
 
+app.use(cors());
+
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+app.use(express.urlencoded({
+    extended: true
+}));
 
 
 // ==========================================
@@ -24,7 +36,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
     express.static(
-        path.join(__dirname, "../html")
+        path.join(__dirname, "../Frontend/html")
     )
 );
 
@@ -36,7 +48,7 @@ app.use(
 app.use(
     "/admin",
     express.static(
-        path.join(__dirname, "../Admin_Pannel")
+        path.join(__dirname, "../Frontend/Admin_Pannel")
     )
 );
 
@@ -46,9 +58,14 @@ app.use(
 // ==========================================
 
 app.use("/api", healthRoutes);
-app.use("/api", serviceRoute);
 
+app.use("/api/services", serviceRoutes);
 
+app.use("/api/teams", teamRoutes);
+
+app.use("/api/blogs", blogRoutes);
+
+app.use("/api/dashboard", dashboardRoutes);
 // ==========================================
 // PUBLIC HOME PAGE
 // ==========================================
@@ -58,8 +75,7 @@ app.get("/", (req, res) => {
     res.sendFile(
         path.join(
             __dirname,
-            "../html",
-            "index.html"
+            "../Frontend/html/index.html"
         )
     );
 
@@ -75,10 +91,37 @@ app.get("/admin", (req, res) => {
     res.sendFile(
         path.join(
             __dirname,
-            "../Admin_Pannel",
-            "dashboard.html"
+            "../Frontend/Admin_Pannel/dashboard.html"
         )
     );
+
+});
+
+
+// ==========================================
+// API TEST
+// ==========================================
+
+app.get("/api", (req, res) => {
+
+    res.json({
+        success: true,
+        message: "ACES API is running"
+    });
+
+});
+
+
+// ==========================================
+// API 404
+// ==========================================
+
+app.use("/api", (req, res) => {
+
+    res.status(404).json({
+        success: false,
+        message: "API route not found"
+    });
 
 });
 
@@ -87,7 +130,7 @@ app.get("/admin", (req, res) => {
 // START SERVER
 // ==========================================
 
-const startServer = async () => {
+async function startServer() {
 
     try {
 
@@ -95,20 +138,21 @@ const startServer = async () => {
 
         app.listen(PORT, () => {
 
-            console.log(
-                `🚀 Server running on http://localhost:${PORT}`
-            );
+            console.log("========================================");
+            console.log("ACES BACKEND");
+            console.log("========================================");
+            console.log(`Server running on:`);
+            console.log(`http://localhost:${PORT}`);
 
         });
 
     } catch (error) {
 
-        console.error(
-            "❌ Server could not start."
-        );
+        console.error("❌ Server could not start:");
+        console.error(error);
 
+        process.exit(1);
     }
-
-};
+}
 
 startServer();

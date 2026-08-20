@@ -1,13 +1,13 @@
-const { sql, getPool } = require("../config/db");
+const { sql, getPool } = require("../Config/db");
 
 
 // ==========================================
-// GET ALL
+// GET ALL SERVICES
 // ==========================================
 
-const getAllServices = async () => {
+async function getServices() {
 
-    const pool = getPool();
+    const pool = await getPool();
 
     const result = await pool
         .request()
@@ -24,16 +24,16 @@ const getAllServices = async () => {
         `);
 
     return result.recordset;
-};
+}
 
 
 // ==========================================
-// GET ONE
+// GET ONE SERVICE
 // ==========================================
 
-const getServiceById = async (id) => {
+async function getService(id) {
 
-    const pool = getPool();
+    const pool = await getPool();
 
     const result = await pool
         .request()
@@ -51,21 +51,48 @@ const getServiceById = async (id) => {
         `);
 
     return result.recordset[0];
-};
+}
 
 
 // ==========================================
-// CREATE
+// GET SERVICE BY ID
 // ==========================================
 
-const createService = async (
+async function getServiceById(id) {
+
+    const pool = await getPool();
+
+    const result = await pool
+        .request()
+        .input("id", sql.Int, Number(id))
+        .query(`
+            SELECT
+                id,
+                title,
+                category,
+                description,
+                status,
+                created_at
+            FROM services
+            WHERE id = @id
+        `);
+
+    return result.recordset[0];
+}
+
+
+// ==========================================
+// CREATE SERVICE
+// ==========================================
+
+async function createService(
     title,
     category,
     description,
     status
-) => {
+) {
 
-    const pool = getPool();
+    const pool = await getPool();
 
     const result = await pool
         .request()
@@ -92,22 +119,22 @@ const createService = async (
         `);
 
     return result.recordset[0].id;
-};
+}
 
 
 // ==========================================
-// UPDATE
+// UPDATE SERVICE
 // ==========================================
 
-const updateService = async (
+async function updateService(
     id,
     title,
     category,
     description,
     status
-) => {
+) {
 
-    const pool = getPool();
+    const pool = await getPool();
 
     const result = await pool
         .request()
@@ -127,16 +154,16 @@ const updateService = async (
         `);
 
     return result;
-};
+}
 
 
 // ==========================================
-// DELETE
+// DELETE SERVICE
 // ==========================================
 
-const deleteService = async (id) => {
+async function deleteService(id) {
 
-    const pool = getPool();
+    const pool = await getPool();
 
     const result = await pool
         .request()
@@ -147,11 +174,12 @@ const deleteService = async (id) => {
         `);
 
     return result;
-};
+}
 
 
 module.exports = {
-    getAllServices,
+    getServices,
+    getService,
     getServiceById,
     createService,
     updateService,

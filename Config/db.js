@@ -2,22 +2,39 @@ const sql = require("mssql");
 require("dotenv").config();
 
 const config = {
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
+    user: process.env.DB_USER || undefined,
+    password: process.env.DB_PASSWORD || undefined,
     server: process.env.DB_SERVER,
-    port: parseInt(process.env.DB_PORT),
+    port: parseInt(process.env.DB_PORT, 10) || 1433,
     database: process.env.DB_DATABASE,
 
     options: {
         encrypt: false,
-        trustServerCertificate: true
+        trustServerCertificate: true,
+        enableArithAbort: true
+    },
+
+    pool: {
+        max: 10,
+        min: 0,
+        idleTimeoutMillis: 30000
     }
 };
 
-let pool;
+let pool = null;
+
+
+// ==========================================
+// CONNECT DATABASE
+// ==========================================
 
 async function connectDB() {
+
     try {
+
+        if (pool) {
+            return pool;
+        }
 
         pool = await sql.connect(config);
 
@@ -25,26 +42,38 @@ async function connectDB() {
 
         return pool;
 
-    } catch (err) {
+    } catch (error) {
+
+        pool = null;
 
         console.error("❌ Database Connection Failed");
-        console.error(err);
+        console.error(error);
 
-        throw err;
+        throw error;
     }
 }
 
-function getPool() {
+
+// ==========================================
+// GET DATABASE POOL
+// ==========================================
+
+async function getPool() {
 
     if (!pool) {
-        throw new Error("Database pool is not connected.");
+        await connectDB();
     }
 
     return pool;
 }
 
+
+// ==========================================
+// EXPORT
+// ==========================================
+
 module.exports = {
+    sql,
     connectDB,
-    getPool,
-    sql
+    getPool
 };

@@ -2,7 +2,7 @@ const express = require("express");
 
 const router = express.Router();
 
-const serviceController = require("../controllers/serviceController");
+const serviceController = require("../Controllers/serviceController");
 
 
 // ==========================================
@@ -11,7 +11,7 @@ const serviceController = require("../controllers/serviceController");
 // ==========================================
 
 router.get(
-    "/services",
+    "/",
     serviceController.getServices
 );
 
@@ -22,7 +22,7 @@ router.get(
 // ==========================================
 
 router.get(
-    "/services/:id",
+    "/:id",
     serviceController.getService
 );
 
@@ -33,7 +33,7 @@ router.get(
 // ==========================================
 
 router.post(
-    "/services",
+    "/",
     serviceController.createService
 );
 
@@ -44,7 +44,7 @@ router.post(
 // ==========================================
 
 router.put(
-    "/services/:id",
+    "/:id",
     serviceController.updateService
 );
 
@@ -55,7 +55,7 @@ router.put(
 // ==========================================
 
 router.delete(
-    "/services/:id",
+    "/:id",
     serviceController.deleteService
 );
 

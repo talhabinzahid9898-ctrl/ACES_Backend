@@ -1,4 +1,4 @@
-const Service = require("../models/serviceModel");
+const Service = require("../Models/serviceModel");
 
 
 // ==========================================
@@ -9,7 +9,7 @@ const getServices = async (req, res) => {
 
     try {
 
-        const services = await Service.getAllServices();
+        const services = await Service.getServices();
 
         res.status(200).json({
             success: true,
@@ -39,17 +39,15 @@ const getService = async (req, res) => {
 
         const id = Number(req.params.id);
 
-        // Validate ID BEFORE sending it to SQL Server
         if (!Number.isInteger(id) || id <= 0) {
 
             return res.status(400).json({
                 success: false,
                 message: "Invalid service ID"
             });
-
         }
 
-        const service = await Service.getServiceById(id);
+        const service = await Service.getService(id);
 
         if (!service) {
 
@@ -57,7 +55,6 @@ const getService = async (req, res) => {
                 success: false,
                 message: "Service not found"
             });
-
         }
 
         res.status(200).json({
@@ -99,7 +96,6 @@ const createService = async (req, res) => {
                 success: false,
                 message: "Service title is required"
             });
-
         }
 
 
@@ -111,8 +107,7 @@ const createService = async (req, res) => {
         );
 
 
-        const service =
-            await Service.getServiceById(serviceId);
+        const service = await Service.getServiceById(serviceId);
 
 
         res.status(201).json({
@@ -143,14 +138,12 @@ const updateService = async (req, res) => {
 
         const id = Number(req.params.id);
 
-        // Validate ID
         if (!Number.isInteger(id) || id <= 0) {
 
             return res.status(400).json({
                 success: false,
                 message: "Invalid service ID"
             });
-
         }
 
 
@@ -168,18 +161,16 @@ const updateService = async (req, res) => {
                 success: false,
                 message: "Service title is required"
             });
-
         }
 
 
-        const result =
-            await Service.updateService(
-                id,
-                title.trim(),
-                category ? category.trim() : null,
-                description ? description.trim() : null,
-                status || "Published"
-            );
+        const result = await Service.updateService(
+            id,
+            title.trim(),
+            category ? category.trim() : null,
+            description ? description.trim() : null,
+            status || "Published"
+        );
 
 
         if (result.rowsAffected[0] === 0) {
@@ -188,12 +179,10 @@ const updateService = async (req, res) => {
                 success: false,
                 message: "Service not found"
             });
-
         }
 
 
-        const service =
-            await Service.getServiceById(id);
+        const service = await Service.getServiceById(id);
 
 
         res.status(200).json({
@@ -224,19 +213,16 @@ const deleteService = async (req, res) => {
 
         const id = Number(req.params.id);
 
-        // Validate ID
         if (!Number.isInteger(id) || id <= 0) {
 
             return res.status(400).json({
                 success: false,
                 message: "Invalid service ID"
             });
-
         }
 
 
-        const result =
-            await Service.deleteService(id);
+        const result = await Service.deleteService(id);
 
 
         if (result.rowsAffected[0] === 0) {
@@ -245,7 +231,6 @@ const deleteService = async (req, res) => {
                 success: false,
                 message: "Service not found"
             });
-
         }
 
 
