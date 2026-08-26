@@ -4,41 +4,52 @@ const dashboardModel =
     require("../Models/dashboardModel");
 
 
-// =====================================================
+// ============================================================
 // GET DASHBOARD
-// =====================================================
+// ============================================================
 
 async function getDashboard(req, res) {
 
     try {
 
-        const stats =
-            await dashboardModel.getDashboardStats();
-
-
-        const activities =
-            await dashboardModel.getRecentActivities();
+        const dashboard =
+            await dashboardModel.getDashboard();
 
 
         res.status(200).json({
 
             success: true,
 
-            data: {
-
-                stats,
-
-                activities
-
-            }
+            data: dashboard
 
         });
 
     } catch (error) {
 
         console.error(
-            "Dashboard Error:",
+            "======================================"
+        );
+
+        console.error(
+            "DASHBOARD ERROR:"
+        );
+
+        console.error(
             error
+        );
+
+        console.error(
+            "MESSAGE:",
+            error.message
+        );
+
+        console.error(
+            "STACK:",
+            error.stack
+        );
+
+        console.error(
+            "======================================"
         );
 
 
@@ -47,7 +58,11 @@ async function getDashboard(req, res) {
             success: false,
 
             message:
-                "Failed to load dashboard"
+                "Failed to load dashboard",
+
+            // Temporary debugging information
+            error:
+                error.message
 
         });
 
@@ -55,9 +70,9 @@ async function getDashboard(req, res) {
 }
 
 
-// =====================================================
+// ============================================================
 // EXPORT
-// =====================================================
+// ============================================================
 
 module.exports = {
     getDashboard

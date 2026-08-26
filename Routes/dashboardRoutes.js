@@ -1,18 +1,18 @@
 "use strict";
 
-const express = require("express");
-
-const router =
-    express.Router();
+const express =
+    require("express");
 
 const dashboardController =
     require("../Controllers/dashboardControllers");
 
+const router =
+    express.Router();
 
-// =====================================================
-// GET DASHBOARD DATA
-// GET /api/dashboard
-// =====================================================
+
+// ============================================================
+// GET DASHBOARD
+// ============================================================
 
 router.get(
     "/",

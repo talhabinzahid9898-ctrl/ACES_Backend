@@ -98,7 +98,7 @@ const upload =
             // Adjust according to your Cloudinary plan
 
             fileSize:
-                500 * 1024 * 1024
+                100 * 1024 * 1024
         }
     });
 

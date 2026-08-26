@@ -1,146 +1,150 @@
 "use strict";
 
-const { getPool, sql } = require("../Config/db");
+const {
+    getPool,
+    sql
+} = require("../Config/db");
 
 
-// =====================================================
+// ============================================================
 // GET DASHBOARD STATISTICS
-// =====================================================
+// ============================================================
 
 async function getDashboardStats() {
 
     const pool = await getPool();
 
-    // -------------------------------------------------
-    // PROJECTS
-    // -------------------------------------------------
+    const result = await pool.request().query(`
 
-    const projectsResult = await pool.request().query(`
-        SELECT COUNT(*) AS total
-        FROM Projects
+        SELECT
+
+            /* ============================
+               TOTAL PROJECTS
+            ============================ */
+
+            (
+                SELECT COUNT(*)
+                FROM Projects
+            ) AS totalProjects,
+
+
+            /* ============================
+               ACTIVE SERVICES
+            ============================ */
+
+            (
+                SELECT COUNT(*)
+                FROM Services
+                WHERE
+                    TRY_CONVERT(INT, status) = 1
+                    OR LOWER(CONVERT(NVARCHAR(50), status)) = 'published'
+            ) AS activeServices,
+
+
+            /* ============================
+               PUBLISHED BLOGS
+            ============================ */
+
+            (
+                SELECT COUNT(*)
+                FROM Blogs
+                WHERE
+                    TRY_CONVERT(INT, status) = 1
+                    OR LOWER(CONVERT(NVARCHAR(50), status)) = 'published'
+            ) AS publishedBlogs,
+
+
+            /* ============================
+               ACTIVE TEAM MEMBERS
+            ============================ */
+
+            (
+                SELECT COUNT(*)
+                FROM Teams
+                WHERE
+                    TRY_CONVERT(INT, status) = 1
+                    OR LOWER(CONVERT(NVARCHAR(50), status)) = 'active'
+            ) AS activeTeamMembers
+
     `);
 
-
-    // -------------------------------------------------
-    // SERVICES
-    // -------------------------------------------------
-
-    const servicesResult = await pool.request().query(`
-        SELECT COUNT(*) AS total
-        FROM services
-    `);
-
-
-    // -------------------------------------------------
-    // PUBLISHED BLOGS
-    // -------------------------------------------------
-
-    const blogsResult = await pool.request().query(`
-        SELECT COUNT(*) AS total
-        FROM Blogs
-        WHERE status = 1
-    `);
-
-
-    // -------------------------------------------------
-    // TEAM MEMBERS
-    // -------------------------------------------------
-
-    const teamsResult = await pool.request().query(`
-        SELECT COUNT(*) AS total
-        FROM Teams
-    `);
-
-
-    return {
-
-        projects:
-            projectsResult.recordset[0].total,
-
-        services:
-            servicesResult.recordset[0].total,
-
-        blogs:
-            blogsResult.recordset[0].total,
-
-        teams:
-            teamsResult.recordset[0].total
-    };
+    return result.recordset[0];
 }
 
 
-// =====================================================
+// ============================================================
 // GET RECENT ACTIVITIES
-// =====================================================
+// ============================================================
 
 async function getRecentActivities() {
 
     const pool = await getPool();
 
-    /*
-     * We collect recent records from all content tables.
-     *
-     * created_at / updated_at are used to determine
-     * when the activity happened.
-     */
-
     const result = await pool.request().query(`
 
         SELECT TOP 10
+
             activity_type,
-            title,
-            description,
+            activity_title,
             activity_date
+
         FROM
         (
 
-            -- PROJECTS
+            /* ==========================================
+               PROJECTS
+            ========================================== */
+
             SELECT
-                'project' AS activity_type,
-                title AS title,
-                'Project was added or updated.' AS description,
-                ISNULL(updated_at, created_at) AS activity_date
+
+                'Project' AS activity_type,
+
+                project_title AS activity_title,
+
+                created_at AS activity_date
+
             FROM Projects
 
 
             UNION ALL
 
 
-            -- SERVICES
+            /* ==========================================
+               SERVICES
+            ========================================== */
+
             SELECT
-                'service' AS activity_type,
-                title AS title,
-                'Service was added or updated.' AS description,
-                ISNULL(updated_at, created_at) AS activity_date
-            FROM services
+
+                'Service' AS activity_type,
+
+                title AS activity_title,
+
+                created_at AS activity_date
+
+            FROM Services
 
 
             UNION ALL
 
 
-            -- BLOGS
+            /* ==========================================
+               BLOGS
+            ========================================== */
+
             SELECT
-                'blog' AS activity_type,
-                title AS title,
-                'Blog article was added or updated.' AS description,
-                ISNULL(updated_at, created_at) AS activity_date
+
+                'Blog' AS activity_type,
+
+                title AS activity_title,
+
+                COALESCE(
+                    published_at,
+                    created_at
+                ) AS activity_date
+
             FROM Blogs
 
-
-            UNION ALL
-
-
-            -- TEAMS
-            SELECT
-                'team' AS activity_type,
-                name AS title,
-                'Team member was added or updated.' AS description,
-                ISNULL(updated_at, created_at) AS activity_date
-            FROM Teams
-
-        ) AS activities
-
-        WHERE activity_date IS NOT NULL
+        ) AS Activities
 
         ORDER BY activity_date DESC
 
@@ -150,11 +154,31 @@ async function getRecentActivities() {
 }
 
 
-// =====================================================
+// ============================================================
+// GET COMPLETE DASHBOARD
+// ============================================================
+
+async function getDashboard() {
+
+    const stats =
+        await getDashboardStats();
+
+    const activities =
+        await getRecentActivities();
+
+    return {
+        stats,
+        activities
+    };
+}
+
+
+// ============================================================
 // EXPORT
-// =====================================================
+// ============================================================
 
 module.exports = {
     getDashboardStats,
-    getRecentActivities
+    getRecentActivities,
+    getDashboard
 };

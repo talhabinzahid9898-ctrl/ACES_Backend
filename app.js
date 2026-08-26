@@ -1,33 +1,140 @@
 "use strict";
 
 const express = require("express");
-const cors = require("cors");
 const path = require("path");
+const session = require("express-session");
+const MSSQLStore = require("connect-mssql-v2");
+
 require("dotenv").config();
 
-const { connectDB } = require("./config/db");
-
-const healthRoutes = require("./Routes/healthRoutes");
-const serviceRoutes = require("./Routes/serviceRoute");
-const teamRoutes = require("./Routes/teamRoutes");
-const blogRoutes = require("./Routes/blogRoutes");
-const dashboardRoutes = require("./Routes/dashboardRoutes");
+const { connectDB } = require("./Config/db");
 
 const app = express();
 const PORT = 3000;
 
 
-// ==========================================
-// MIDDLEWARE
-// ==========================================
 
-app.use(cors());
+/* =========================================================
+   BODY PARSER
+========================================================= */
 
 app.use(express.json());
 
-app.use(express.urlencoded({
-    extended: true
-}));
+app.use(
+    express.urlencoded({
+        extended: true
+    })
+);
+
+
+/* =========================================================
+   SQL SERVER SESSION STORE
+========================================================= */
+
+const sessionDBConfig = {
+
+    server:
+        process.env.DB_SERVER,
+
+    database:
+        process.env.DB_DATABASE,
+
+    options: {
+
+        trustedConnection: true,
+
+        trustServerCertificate: true,
+
+        encrypt: false
+
+    }
+
+};
+
+
+// const sessionStore =
+//     new MSSQLStore(
+//         sessionDBConfig,
+//         {
+
+//             ttl:
+//                 1000 *
+//                 60 *
+//                 60 *
+//                 8,
+
+//             autoRemove: true,
+
+//             autoRemoveInterval:
+//                 1000 *
+//                 60 *
+//                 10
+
+//         }
+//     );
+
+
+/* =========================================================
+   SESSION MIDDLEWARE
+========================================================= */
+
+// app.use(
+//     session({
+
+//         store:
+//             sessionStore,
+
+//         secret:
+//             process.env.SESSION_SECRET,
+
+//         name:
+//             "aces.sid",
+
+//         resave:
+//             false,
+
+//         saveUninitialized:
+//             false,
+
+//         rolling:
+//             true,
+
+//         cookie: {
+
+//             httpOnly:
+//                 true,
+
+//             secure:
+//                 process.env.NODE_ENV === "production",
+
+//             sameSite:
+//                 "lax",
+
+//             maxAge:
+//                 1000 *
+//                 60 *
+//                 60 *
+//                 8
+
+//         }
+
+//     })
+// );
+
+
+/* =========================================================
+   AUTH ROUTES
+========================================================= */
+
+const authRoutes = require("./routes/authRoutes");
+const authenticateAdmin = require("./middleware/authMiddleware");
+const healthRoutes = require("./Routes/healthRoutes");
+const serviceRoutes = require("./Routes/serviceRoute");
+const teamRoutes = require("./Routes/teamRoutes");
+const blogRoutes = require("./Routes/blogRoutes");
+const dashboardRoutes = require("./Routes/dashboardRoutes");
+const projectRoutes = require("./Routes/projectRoutes");
+
 
 
 // ==========================================
@@ -59,6 +166,8 @@ app.use(
 
 app.use("/api", healthRoutes);
 
+app.use("/api/auth",authRoutes);
+
 app.use("/api/services", serviceRoutes);
 
 app.use("/api/teams", teamRoutes);
@@ -66,6 +175,25 @@ app.use("/api/teams", teamRoutes);
 app.use("/api/blogs", blogRoutes);
 
 app.use("/api/dashboard", dashboardRoutes);
+
+app.use("/api/project", projectRoutes);
+
+app.get(
+    "/api/auth/me",
+    authenticateAdmin,
+    (req, res) => {
+
+        res.json({
+
+            success: true,
+
+            admin: req.admin
+
+        });
+
+    }
+);
+
 // ==========================================
 // PUBLIC HOME PAGE
 // ==========================================
@@ -91,7 +219,7 @@ app.get("/admin", (req, res) => {
     res.sendFile(
         path.join(
             __dirname,
-            "../Frontend/Admin_Pannel/dashboard.html"
+            "../Frontend/Admin_Pannel/login.html"
         )
     );
 
