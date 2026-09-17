@@ -1,13 +1,11 @@
-const { sql, getPool } = require("../Config/db");
+const { getPool } = require("../Config/db");
 
 async function getAdminByEmail(email) {
 
     const pool = await getPool();
 
-    const result = await pool
-        .request()
-        .input("email", sql.NVarChar(255), email)
-        .query(`
+    const [rows] = await pool.query(
+        `
             SELECT
                 id,
                 email,
@@ -17,10 +15,12 @@ async function getAdminByEmail(email) {
                 otp_expires_at,
                 otp_attempts
             FROM Admins
-            WHERE email = @email
-        `);
+            WHERE email = ?
+        `,
+        [email]
+    );
 
-    return result.recordset[0] || null;
+    return rows[0] || null;
 }
 
 
@@ -28,20 +28,18 @@ async function saveOTP(adminId, otpHash, expiresAt) {
 
     const pool = await getPool();
 
-    await pool
-        .request()
-        .input("id", sql.Int, adminId)
-        .input("otp_hash", sql.NVarChar(255), otpHash)
-        .input("otp_expires_at", sql.DateTime2, expiresAt)
-        .query(`
+    await pool.query(
+        `
             UPDATE Admins
             SET
-                otp_hash = @otp_hash,
-                otp_expires_at = @otp_expires_at,
+                otp_hash = ?,
+                otp_expires_at = ?,
                 otp_attempts = 0,
-                updated_at = GETDATE()
-            WHERE id = @id
-        `);
+                updated_at = NOW()
+            WHERE id = ?
+        `,
+        [otpHash, expiresAt, adminId]
+    );
 }
 
 
@@ -49,14 +47,14 @@ async function incrementOTPAttempts(adminId) {
 
     const pool = await getPool();
 
-    await pool
-        .request()
-        .input("id", sql.Int, adminId)
-        .query(`
+    await pool.query(
+        `
             UPDATE Admins
             SET otp_attempts = otp_attempts + 1
-            WHERE id = @id
-        `);
+            WHERE id = ?
+        `,
+        [adminId]
+    );
 }
 
 
@@ -64,18 +62,18 @@ async function clearOTP(adminId) {
 
     const pool = await getPool();
 
-    await pool
-        .request()
-        .input("id", sql.Int, adminId)
-        .query(`
+    await pool.query(
+        `
             UPDATE Admins
             SET
                 otp_hash = NULL,
                 otp_expires_at = NULL,
                 otp_attempts = 0,
-                updated_at = GETDATE()
-            WHERE id = @id
-        `);
+                updated_at = NOW()
+            WHERE id = ?
+        `,
+        [adminId]
+    );
 }
 
 

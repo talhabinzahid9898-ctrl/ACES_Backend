@@ -1,4 +1,193 @@
-const { sql, getPool } = require("../Config/db");
+// const { sql, getPool } = require("../Config/db");
+
+
+// // ==========================================
+// // GET ALL SERVICES
+// // ==========================================
+
+// async function getServices() {
+
+//     const pool = await getPool();
+
+//     const result = await pool
+//         .request()
+//         .query(`
+//             SELECT
+//                 id,
+//                 title,
+//                 category,
+//                 description,
+//                 status,
+//                 created_at
+//             FROM services
+//             ORDER BY created_at DESC
+//         `);
+
+//     return result.recordset;
+// }
+
+
+// // ==========================================
+// // GET ONE SERVICE
+// // ==========================================
+
+// async function getService(id) {
+
+//     const pool = await getPool();
+
+//     const result = await pool
+//         .request()
+//         .input("id", sql.Int, Number(id))
+//         .query(`
+//             SELECT
+//                 id,
+//                 title,
+//                 category,
+//                 description,
+//                 status,
+//                 created_at
+//             FROM services
+//             WHERE id = @id
+//         `);
+
+//     return result.recordset[0];
+// }
+
+
+// // ==========================================
+// // GET SERVICE BY ID
+// // ==========================================
+
+// async function getServiceById(id) {
+
+//     const pool = await getPool();
+
+//     const result = await pool
+//         .request()
+//         .input("id", sql.Int, Number(id))
+//         .query(`
+//             SELECT
+//                 id,
+//                 title,
+//                 category,
+//                 description,
+//                 status,
+//                 created_at
+//             FROM services
+//             WHERE id = @id
+//         `);
+
+//     return result.recordset[0];
+// }
+
+
+// // ==========================================
+// // CREATE SERVICE
+// // ==========================================
+
+// async function createService(
+//     title,
+//     category,
+//     description,
+//     status
+// ) {
+
+//     const pool = await getPool();
+
+//     const result = await pool
+//         .request()
+//         .input("title", sql.VarChar(255), title)
+//         .input("category", sql.VarChar(100), category)
+//         .input("description", sql.VarChar(sql.MAX), description)
+//         .input("status", sql.VarChar(20), status)
+//         .query(`
+//             INSERT INTO services
+//             (
+//                 title,
+//                 category,
+//                 description,
+//                 status
+//             )
+//             OUTPUT INSERTED.id
+//             VALUES
+//             (
+//                 @title,
+//                 @category,
+//                 @description,
+//                 @status
+//             )
+//         `);
+
+//     return result.recordset[0].id;
+// }
+
+
+// // ==========================================
+// // UPDATE SERVICE
+// // ==========================================
+
+// async function updateService(
+//     id,
+//     title,
+//     category,
+//     description,
+//     status
+// ) {
+
+//     const pool = await getPool();
+
+//     const result = await pool
+//         .request()
+//         .input("id", sql.Int, Number(id))
+//         .input("title", sql.VarChar(255), title)
+//         .input("category", sql.VarChar(100), category)
+//         .input("description", sql.VarChar(sql.MAX), description)
+//         .input("status", sql.VarChar(20), status)
+//         .query(`
+//             UPDATE services
+//             SET
+//                 title = @title,
+//                 category = @category,
+//                 description = @description,
+//                 status = @status
+//             WHERE id = @id
+//         `);
+
+//     return result;
+// }
+
+
+// // ==========================================
+// // DELETE SERVICE
+// // ==========================================
+
+// async function deleteService(id) {
+
+//     const pool = await getPool();
+
+//     const result = await pool
+//         .request()
+//         .input("id", sql.Int, Number(id))
+//         .query(`
+//             DELETE FROM services
+//             WHERE id = @id
+//         `);
+
+//     return result;
+// }
+
+
+// module.exports = {
+//     getServices,
+//     getService,
+//     getServiceById,
+//     createService,
+//     updateService,
+//     deleteService
+// };
+
+
+const { getPool } = require("../Config/db");
 
 
 // ==========================================
@@ -9,21 +198,19 @@ async function getServices() {
 
     const pool = await getPool();
 
-    const result = await pool
-        .request()
-        .query(`
-            SELECT
-                id,
-                title,
-                category,
-                description,
-                status,
-                created_at
-            FROM services
-            ORDER BY created_at DESC
-        `);
+    const [rows] = await pool.query(`
+        SELECT
+            id,
+            title,
+            category,
+            description,
+            status,
+            created_at
+        FROM services
+        ORDER BY created_at DESC
+    `);
 
-    return result.recordset;
+    return rows;
 }
 
 
@@ -35,10 +222,8 @@ async function getService(id) {
 
     const pool = await getPool();
 
-    const result = await pool
-        .request()
-        .input("id", sql.Int, Number(id))
-        .query(`
+    const [rows] = await pool.query(
+        `
             SELECT
                 id,
                 title,
@@ -47,10 +232,12 @@ async function getService(id) {
                 status,
                 created_at
             FROM services
-            WHERE id = @id
-        `);
+            WHERE id = ?
+        `,
+        [Number(id)]
+    );
 
-    return result.recordset[0];
+    return rows[0];
 }
 
 
@@ -62,10 +249,8 @@ async function getServiceById(id) {
 
     const pool = await getPool();
 
-    const result = await pool
-        .request()
-        .input("id", sql.Int, Number(id))
-        .query(`
+    const [rows] = await pool.query(
+        `
             SELECT
                 id,
                 title,
@@ -74,10 +259,12 @@ async function getServiceById(id) {
                 status,
                 created_at
             FROM services
-            WHERE id = @id
-        `);
+            WHERE id = ?
+        `,
+        [Number(id)]
+    );
 
-    return result.recordset[0];
+    return rows[0];
 }
 
 
@@ -94,13 +281,8 @@ async function createService(
 
     const pool = await getPool();
 
-    const result = await pool
-        .request()
-        .input("title", sql.VarChar(255), title)
-        .input("category", sql.VarChar(100), category)
-        .input("description", sql.VarChar(sql.MAX), description)
-        .input("status", sql.VarChar(20), status)
-        .query(`
+    const [result] = await pool.query(
+        `
             INSERT INTO services
             (
                 title,
@@ -108,17 +290,18 @@ async function createService(
                 description,
                 status
             )
-            OUTPUT INSERTED.id
             VALUES
             (
-                @title,
-                @category,
-                @description,
-                @status
+                ?,
+                ?,
+                ?,
+                ?
             )
-        `);
+        `,
+        [title, category, description, status]
+    );
 
-    return result.recordset[0].id;
+    return result.insertId;
 }
 
 
@@ -136,22 +319,18 @@ async function updateService(
 
     const pool = await getPool();
 
-    const result = await pool
-        .request()
-        .input("id", sql.Int, Number(id))
-        .input("title", sql.VarChar(255), title)
-        .input("category", sql.VarChar(100), category)
-        .input("description", sql.VarChar(sql.MAX), description)
-        .input("status", sql.VarChar(20), status)
-        .query(`
+    const [result] = await pool.query(
+        `
             UPDATE services
             SET
-                title = @title,
-                category = @category,
-                description = @description,
-                status = @status
-            WHERE id = @id
-        `);
+                title = ?,
+                category = ?,
+                description = ?,
+                status = ?
+            WHERE id = ?
+        `,
+        [title, category, description, status, Number(id)]
+    );
 
     return result;
 }
@@ -165,13 +344,13 @@ async function deleteService(id) {
 
     const pool = await getPool();
 
-    const result = await pool
-        .request()
-        .input("id", sql.Int, Number(id))
-        .query(`
+    const [result] = await pool.query(
+        `
             DELETE FROM services
-            WHERE id = @id
-        `);
+            WHERE id = ?
+        `,
+        [Number(id)]
+    );
 
     return result;
 }

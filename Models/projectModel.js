@@ -1,8 +1,586 @@
+// "use strict";
+
+// const {
+//     getPool,
+//     sql
+// } = require("../Config/db");
+
+
+// // =====================================================
+// // GET ALL PROJECTS
+// // =====================================================
+
+// async function getProjects() {
+
+//     const pool = await getPool();
+
+//     const result = await pool.request().query(`
+
+//         SELECT
+//             id,
+//             project_title,
+//             category,
+//             client,
+//             location,
+//             description,
+//             project_image,
+//             image_public_id,
+//             completion_date,
+//             status,
+//             project_area,
+//             offered_service,
+//             uploaded_at,
+//             created_at,
+//             updated_at
+
+//         FROM Projects
+
+//         ORDER BY
+//             created_at DESC
+
+//     `);
+
+//     return result.recordset;
+// }
+
+
+// // =====================================================
+// // GET SINGLE PROJECT
+// // =====================================================
+
+// async function getProject(id) {
+
+//     const pool = await getPool();
+
+//     const projectResult =
+//         await pool.request()
+
+//             .input(
+//                 "id",
+//                 sql.Int,
+//                 id
+//             )
+
+//             .query(`
+
+//                 SELECT
+//                     id,
+//                     project_title,
+//                     category,
+//                     client,
+//                     location,
+//                     description,
+//                     project_image,
+//                     image_public_id,
+//                     completion_date,
+//                     status,
+//                     project_area,
+//                     offered_service,
+//                     uploaded_at,
+//                     created_at,
+//                     updated_at
+
+//                 FROM Projects
+
+//                 WHERE id = @id
+
+//             `);
+
+
+//     if (
+//         projectResult.recordset.length === 0
+//     ) {
+
+//         return null;
+
+//     }
+
+
+//     const project =
+//         projectResult.recordset[0];
+
+
+//     // =================================================
+//     // GET GALLERY
+//     // =================================================
+
+//     const galleryResult =
+//         await pool.request()
+
+//             .input(
+//                 "project_id",
+//                 sql.Int,
+//                 id
+//             )
+
+//             .query(`
+
+//                 SELECT
+
+//                     id,
+//                     project_id,
+//                     image_url,
+//                     image_public_id,
+//                     created_at
+
+//                 FROM ProjectGallery
+
+//                 WHERE project_id = @project_id
+
+//                 ORDER BY id ASC
+
+//             `);
+
+
+//     project.gallery =
+//         galleryResult.recordset;
+
+
+//     return project;
+// }
+
+
+// // =====================================================
+// // CREATE PROJECT
+// // =====================================================
+
+// async function createProject(projectData) {
+
+//     const pool = await getPool();
+
+
+//     const result =
+//         await pool.request()
+
+//             .input(
+//                 "project_title",
+//                 sql.NVarChar(250),
+//                 projectData.project_title
+//             )
+
+//             .input(
+//                 "category",
+//                 sql.NVarChar(100),
+//                 projectData.category
+//             )
+
+//             .input(
+//                 "client",
+//                 sql.NVarChar(200),
+//                 projectData.client || null
+//             )
+
+//             .input(
+//                 "location",
+//                 sql.NVarChar(250),
+//                 projectData.location || null
+//             )
+
+//             .input(
+//                 "description",
+//                 sql.NVarChar(sql.MAX),
+//                 projectData.description || null
+//             )
+
+//             .input(
+//                 "project_image",
+//                 sql.NVarChar(1000),
+//                 projectData.project_image || null
+//             )
+
+//             .input(
+//                 "image_public_id",
+//                 sql.NVarChar(500),
+//                 projectData.image_public_id || null
+//             )
+
+//             .input(
+//                 "completion_date",
+//                 sql.Date,
+//                 projectData.completion_date || null
+//             )
+
+//             .input(
+//                 "status",
+//                 sql.NVarChar(50),
+//                 projectData.status || "Completed"
+//             )
+
+//             .input(
+//                 "project_area",
+//                 sql.NVarChar(100),
+//                 projectData.project_area || null
+//             )
+
+//             .input(
+//                 "offered_service",
+//                 sql.NVarChar(1000),
+//                 projectData.offered_service || null
+//             )
+
+//             .input(
+//                 "uploaded_at",
+//                 sql.DateTime2,
+//                 projectData.uploaded_at || new Date()
+//             )
+
+//             .query(`
+
+//                 INSERT INTO Projects
+//                 (
+//                     project_title,
+//                     category,
+//                     client,
+//                     location,
+//                     description,
+//                     project_image,
+//                     image_public_id,
+//                     completion_date,
+//                     status,
+//                     project_area,
+//                     offered_service,
+//                     uploaded_at
+//                 )
+
+//                 OUTPUT INSERTED.*
+
+//                 VALUES
+//                 (
+//                     @project_title,
+//                     @category,
+//                     @client,
+//                     @location,
+//                     @description,
+//                     @project_image,
+//                     @image_public_id,
+//                     @completion_date,
+//                     @status,
+//                     @project_area,
+//                     @offered_service,
+//                     @uploaded_at
+//                 )
+
+//             `);
+
+
+//     return result.recordset[0];
+// }
+
+
+// // =====================================================
+// // UPDATE PROJECT
+// // =====================================================
+
+// async function updateProject(
+//     id,
+//     projectData
+// ) {
+
+//     const pool = await getPool();
+
+//     const request =
+//         pool.request();
+
+
+//     request.input(
+//         "id",
+//         sql.Int,
+//         id
+//     );
+
+
+//     request.input(
+//         "project_title",
+//         sql.NVarChar(250),
+//         projectData.project_title
+//     );
+
+
+//     request.input(
+//         "category",
+//         sql.NVarChar(100),
+//         projectData.category
+//     );
+
+
+//     request.input(
+//         "client",
+//         sql.NVarChar(200),
+//         projectData.client || null
+//     );
+
+
+//     request.input(
+//         "location",
+//         sql.NVarChar(250),
+//         projectData.location || null
+//     );
+
+
+//     request.input(
+//         "description",
+//         sql.NVarChar(sql.MAX),
+//         projectData.description || null
+//     );
+
+
+//     request.input(
+//         "completion_date",
+//         sql.Date,
+//         projectData.completion_date || null
+//     );
+
+
+//     request.input(
+//         "status",
+//         sql.NVarChar(50),
+//         projectData.status || "Completed"
+//     );
+
+
+//     request.input(
+//         "project_area",
+//         sql.NVarChar(100),
+//         projectData.project_area || null
+//     );
+
+
+//     request.input(
+//         "offered_service",
+//         sql.NVarChar(1000),
+//         projectData.offered_service || null
+//     );
+
+
+//     let query = `
+
+//         UPDATE Projects
+
+//         SET
+
+//             project_title = @project_title,
+
+//             category = @category,
+
+//             client = @client,
+
+//             location = @location,
+
+//             description = @description,
+
+//             completion_date = @completion_date,
+
+//             status = @status,
+
+//             project_area = @project_area,
+
+//             offered_service = @offered_service,
+
+//             updated_at = GETDATE()
+
+//     `;
+
+
+//     // =================================================
+//     // MAIN IMAGE
+//     // =================================================
+
+//     if (projectData.project_image) {
+
+//         request.input(
+//             "project_image",
+//             sql.NVarChar(1000),
+//             projectData.project_image
+//         );
+
+
+//         request.input(
+//             "image_public_id",
+//             sql.NVarChar(500),
+//             projectData.image_public_id
+//         );
+
+
+//         query += `,
+
+//             project_image = @project_image,
+
+//             image_public_id =
+//                 @image_public_id
+
+//         `;
+//     }
+
+
+//     query += `
+
+//         OUTPUT INSERTED.*
+
+//         WHERE id = @id
+
+//     `;
+
+
+//     const result =
+//         await request.query(query);
+
+
+//     return result.recordset[0];
+// }
+
+
+// // =====================================================
+// // DELETE PROJECT
+// // =====================================================
+
+// async function deleteProject(id) {
+
+//     const pool = await getPool();
+
+
+//     const result =
+//         await pool.request()
+
+//             .input(
+//                 "id",
+//                 sql.Int,
+//                 id
+//             )
+
+//             .query(`
+
+//                 DELETE FROM Projects
+
+//                 OUTPUT DELETED.*
+
+//                 WHERE id = @id
+
+//             `);
+
+
+//     return result.recordset[0];
+// }
+
+
+// // =====================================================
+// // ADD GALLERY IMAGE
+// // =====================================================
+
+// async function addGalleryImage(
+//     projectId,
+//     imageUrl,
+//     publicId
+// ) {
+
+//     const pool = await getPool();
+
+
+//     const result =
+//         await pool.request()
+
+//             .input(
+//                 "project_id",
+//                 sql.Int,
+//                 projectId
+//             )
+
+//             .input(
+//                 "image_url",
+//                 sql.NVarChar(1000),
+//                 imageUrl
+//             )
+
+//             .input(
+//                 "image_public_id",
+//                 sql.NVarChar(500),
+//                 publicId
+//             )
+
+//             .query(`
+
+//                 INSERT INTO ProjectGallery
+//                 (
+//                     project_id,
+//                     image_url,
+//                     image_public_id
+//                 )
+
+//                 OUTPUT INSERTED.*
+
+//                 VALUES
+//                 (
+//                     @project_id,
+//                     @image_url,
+//                     @image_public_id
+//                 )
+
+//             `);
+
+
+//     return result.recordset[0];
+// }
+
+
+// // =====================================================
+// // DELETE GALLERY IMAGE
+// // =====================================================
+
+// async function deleteGalleryImage(id) {
+
+//     const pool = await getPool();
+
+
+//     const result =
+//         await pool.request()
+
+//             .input(
+//                 "id",
+//                 sql.Int,
+//                 id
+//             )
+
+//             .query(`
+
+//                 DELETE FROM ProjectGallery
+
+//                 OUTPUT DELETED.*
+
+//                 WHERE id = @id
+
+//             `);
+
+
+//     return result.recordset[0];
+// }
+
+
+// // =====================================================
+// // EXPORT
+// // =====================================================
+
+// module.exports = {
+
+//     getProjects,
+
+//     getProject,
+
+//     createProject,
+
+//     updateProject,
+
+//     deleteProject,
+
+//     addGalleryImage,
+
+//     deleteGalleryImage
+
+// };
+
+
 "use strict";
 
 const {
-    getPool,
-    sql
+    getPool
 } = require("../Config/db");
 
 
@@ -14,7 +592,7 @@ async function getProjects() {
 
     const pool = await getPool();
 
-    const result = await pool.request().query(`
+    const [rows] = await pool.query(`
 
         SELECT
             id,
@@ -40,7 +618,7 @@ async function getProjects() {
 
     `);
 
-    return result.recordset;
+    return rows;
 }
 
 
@@ -52,16 +630,9 @@ async function getProject(id) {
 
     const pool = await getPool();
 
-    const projectResult =
-        await pool.request()
-
-            .input(
-                "id",
-                sql.Int,
-                id
-            )
-
-            .query(`
+    const [projectRows] =
+        await pool.query(
+            `
 
                 SELECT
                     id,
@@ -82,13 +653,15 @@ async function getProject(id) {
 
                 FROM Projects
 
-                WHERE id = @id
+                WHERE id = ?
 
-            `);
+            `,
+            [id]
+        );
 
 
     if (
-        projectResult.recordset.length === 0
+        projectRows.length === 0
     ) {
 
         return null;
@@ -97,23 +670,16 @@ async function getProject(id) {
 
 
     const project =
-        projectResult.recordset[0];
+        projectRows[0];
 
 
     // =================================================
     // GET GALLERY
     // =================================================
 
-    const galleryResult =
-        await pool.request()
-
-            .input(
-                "project_id",
-                sql.Int,
-                id
-            )
-
-            .query(`
+    const [galleryRows] =
+        await pool.query(
+            `
 
                 SELECT
 
@@ -125,15 +691,17 @@ async function getProject(id) {
 
                 FROM ProjectGallery
 
-                WHERE project_id = @project_id
+                WHERE project_id = ?
 
                 ORDER BY id ASC
 
-            `);
+            `,
+            [id]
+        );
 
 
     project.gallery =
-        galleryResult.recordset;
+        galleryRows;
 
 
     return project;
@@ -149,82 +717,9 @@ async function createProject(projectData) {
     const pool = await getPool();
 
 
-    const result =
-        await pool.request()
-
-            .input(
-                "project_title",
-                sql.NVarChar(250),
-                projectData.project_title
-            )
-
-            .input(
-                "category",
-                sql.NVarChar(100),
-                projectData.category
-            )
-
-            .input(
-                "client",
-                sql.NVarChar(200),
-                projectData.client || null
-            )
-
-            .input(
-                "location",
-                sql.NVarChar(250),
-                projectData.location || null
-            )
-
-            .input(
-                "description",
-                sql.NVarChar(sql.MAX),
-                projectData.description || null
-            )
-
-            .input(
-                "project_image",
-                sql.NVarChar(1000),
-                projectData.project_image || null
-            )
-
-            .input(
-                "image_public_id",
-                sql.NVarChar(500),
-                projectData.image_public_id || null
-            )
-
-            .input(
-                "completion_date",
-                sql.Date,
-                projectData.completion_date || null
-            )
-
-            .input(
-                "status",
-                sql.NVarChar(50),
-                projectData.status || "Completed"
-            )
-
-            .input(
-                "project_area",
-                sql.NVarChar(100),
-                projectData.project_area || null
-            )
-
-            .input(
-                "offered_service",
-                sql.NVarChar(1000),
-                projectData.offered_service || null
-            )
-
-            .input(
-                "uploaded_at",
-                sql.DateTime2,
-                projectData.uploaded_at || new Date()
-            )
-
-            .query(`
+    const [result] =
+        await pool.query(
+            `
 
                 INSERT INTO Projects
                 (
@@ -242,28 +737,42 @@ async function createProject(projectData) {
                     uploaded_at
                 )
 
-                OUTPUT INSERTED.*
-
                 VALUES
                 (
-                    @project_title,
-                    @category,
-                    @client,
-                    @location,
-                    @description,
-                    @project_image,
-                    @image_public_id,
-                    @completion_date,
-                    @status,
-                    @project_area,
-                    @offered_service,
-                    @uploaded_at
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?
                 )
 
-            `);
+            `,
+            [
+                projectData.project_title,
+                projectData.category,
+                projectData.client || null,
+                projectData.location || null,
+                projectData.description || null,
+                projectData.project_image || null,
+                projectData.image_public_id || null,
+                projectData.completion_date || null,
+                projectData.status || "Completed",
+                projectData.project_area || null,
+                projectData.offered_service || null,
+                projectData.uploaded_at || new Date()
+            ]
+        );
 
 
-    return result.recordset[0];
+    // MySQL has no OUTPUT INSERTED.* — fetch the row we just created
+    return getProject(result.insertId);
 }
 
 
@@ -278,79 +787,6 @@ async function updateProject(
 
     const pool = await getPool();
 
-    const request =
-        pool.request();
-
-
-    request.input(
-        "id",
-        sql.Int,
-        id
-    );
-
-
-    request.input(
-        "project_title",
-        sql.NVarChar(250),
-        projectData.project_title
-    );
-
-
-    request.input(
-        "category",
-        sql.NVarChar(100),
-        projectData.category
-    );
-
-
-    request.input(
-        "client",
-        sql.NVarChar(200),
-        projectData.client || null
-    );
-
-
-    request.input(
-        "location",
-        sql.NVarChar(250),
-        projectData.location || null
-    );
-
-
-    request.input(
-        "description",
-        sql.NVarChar(sql.MAX),
-        projectData.description || null
-    );
-
-
-    request.input(
-        "completion_date",
-        sql.Date,
-        projectData.completion_date || null
-    );
-
-
-    request.input(
-        "status",
-        sql.NVarChar(50),
-        projectData.status || "Completed"
-    );
-
-
-    request.input(
-        "project_area",
-        sql.NVarChar(100),
-        projectData.project_area || null
-    );
-
-
-    request.input(
-        "offered_service",
-        sql.NVarChar(1000),
-        projectData.offered_service || null
-    );
-
 
     let query = `
 
@@ -358,27 +794,40 @@ async function updateProject(
 
         SET
 
-            project_title = @project_title,
+            project_title = ?,
 
-            category = @category,
+            category = ?,
 
-            client = @client,
+            client = ?,
 
-            location = @location,
+            location = ?,
 
-            description = @description,
+            description = ?,
 
-            completion_date = @completion_date,
+            completion_date = ?,
 
-            status = @status,
+            status = ?,
 
-            project_area = @project_area,
+            project_area = ?,
 
-            offered_service = @offered_service,
+            offered_service = ?,
 
-            updated_at = GETDATE()
+            updated_at = NOW()
 
     `;
+
+
+    const params = [
+        projectData.project_title,
+        projectData.category,
+        projectData.client || null,
+        projectData.location || null,
+        projectData.description || null,
+        projectData.completion_date || null,
+        projectData.status || "Completed",
+        projectData.project_area || null,
+        projectData.offered_service || null
+    ];
 
 
     // =================================================
@@ -387,45 +836,35 @@ async function updateProject(
 
     if (projectData.project_image) {
 
-        request.input(
-            "project_image",
-            sql.NVarChar(1000),
-            projectData.project_image
-        );
-
-
-        request.input(
-            "image_public_id",
-            sql.NVarChar(500),
-            projectData.image_public_id
-        );
-
-
         query += `,
 
-            project_image = @project_image,
+            project_image = ?,
 
-            image_public_id =
-                @image_public_id
+            image_public_id = ?
 
         `;
+
+        params.push(
+            projectData.project_image,
+            projectData.image_public_id
+        );
     }
 
 
     query += `
 
-        OUTPUT INSERTED.*
-
-        WHERE id = @id
+        WHERE id = ?
 
     `;
 
-
-    const result =
-        await request.query(query);
+    params.push(id);
 
 
-    return result.recordset[0];
+    await pool.query(query, params);
+
+
+    // MySQL has no OUTPUT INSERTED.* — fetch the row after updating
+    return getProject(id);
 }
 
 
@@ -438,27 +877,54 @@ async function deleteProject(id) {
     const pool = await getPool();
 
 
-    const result =
-        await pool.request()
+    // MySQL has no OUTPUT DELETED.* — read the row before deleting it
+    const [rows] =
+        await pool.query(
+            `
 
-            .input(
-                "id",
-                sql.Int,
-                id
-            )
+                SELECT
+                    id,
+                    project_title,
+                    category,
+                    client,
+                    location,
+                    description,
+                    project_image,
+                    image_public_id,
+                    completion_date,
+                    status,
+                    project_area,
+                    offered_service,
+                    uploaded_at,
+                    created_at,
+                    updated_at
 
-            .query(`
+                FROM Projects
 
-                DELETE FROM Projects
+                WHERE id = ?
 
-                OUTPUT DELETED.*
-
-                WHERE id = @id
-
-            `);
+            `,
+            [id]
+        );
 
 
-    return result.recordset[0];
+    const deletedProject =
+        rows[0];
+
+
+    await pool.query(
+        `
+
+            DELETE FROM Projects
+
+            WHERE id = ?
+
+        `,
+        [id]
+    );
+
+
+    return deletedProject;
 }
 
 
@@ -475,28 +941,9 @@ async function addGalleryImage(
     const pool = await getPool();
 
 
-    const result =
-        await pool.request()
-
-            .input(
-                "project_id",
-                sql.Int,
-                projectId
-            )
-
-            .input(
-                "image_url",
-                sql.NVarChar(1000),
-                imageUrl
-            )
-
-            .input(
-                "image_public_id",
-                sql.NVarChar(500),
-                publicId
-            )
-
-            .query(`
+    const [result] =
+        await pool.query(
+            `
 
                 INSERT INTO ProjectGallery
                 (
@@ -505,19 +952,45 @@ async function addGalleryImage(
                     image_public_id
                 )
 
-                OUTPUT INSERTED.*
-
                 VALUES
                 (
-                    @project_id,
-                    @image_url,
-                    @image_public_id
+                    ?,
+                    ?,
+                    ?
                 )
 
-            `);
+            `,
+            [
+                projectId,
+                imageUrl,
+                publicId
+            ]
+        );
 
 
-    return result.recordset[0];
+    // MySQL has no OUTPUT INSERTED.* — fetch the row we just created
+    const [rows] =
+        await pool.query(
+            `
+
+                SELECT
+
+                    id,
+                    project_id,
+                    image_url,
+                    image_public_id,
+                    created_at
+
+                FROM ProjectGallery
+
+                WHERE id = ?
+
+            `,
+            [result.insertId]
+        );
+
+
+    return rows[0];
 }
 
 
@@ -530,27 +1003,45 @@ async function deleteGalleryImage(id) {
     const pool = await getPool();
 
 
-    const result =
-        await pool.request()
+    // MySQL has no OUTPUT DELETED.* — read the row before deleting it
+    const [rows] =
+        await pool.query(
+            `
 
-            .input(
-                "id",
-                sql.Int,
-                id
-            )
+                SELECT
 
-            .query(`
+                    id,
+                    project_id,
+                    image_url,
+                    image_public_id,
+                    created_at
 
-                DELETE FROM ProjectGallery
+                FROM ProjectGallery
 
-                OUTPUT DELETED.*
+                WHERE id = ?
 
-                WHERE id = @id
+            `,
+            [id]
+        );
 
-            `);
+
+    const deletedImage =
+        rows[0];
 
 
-    return result.recordset[0];
+    await pool.query(
+        `
+
+            DELETE FROM ProjectGallery
+
+            WHERE id = ?
+
+        `,
+        [id]
+    );
+
+
+    return deletedImage;
 }
 
 
