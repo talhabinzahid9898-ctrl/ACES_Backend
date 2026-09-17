@@ -4,7 +4,7 @@ const projectModel =
     require("../Models/projectModel");
 
 const cloudinary =
-    require("../Config/Cloudinary");
+    require("../Config/cloudinary");
 
 
 // =====================================================

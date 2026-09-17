@@ -11,11 +11,11 @@ const {
 const {
     generateOTP,
     hashOTP
-} = require("../utils/otp");
+} = require("../Utils/otp");
 
 const {
     sendOTPEmail
-} = require("../config/mail");
+} = require("../Config/mail");
 
 
 /*
