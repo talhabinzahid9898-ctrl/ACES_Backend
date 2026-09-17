@@ -6,7 +6,7 @@ const {
     login,
     verifyOTP,
     logout
-} = require("../controllers/authControllers");
+} = require("../Controllers/authControllers");
 
 
 /*
