@@ -127,7 +127,7 @@ const sessionDBConfig = {
 ========================================================= */
 
 const authRoutes = require("./Routes/authRoutes");
-const authenticateAdmin = require("./middleware/authMiddleware");
+const authenticateAdmin = require("./Middleware/authMiddleware");
 const healthRoutes = require("./Routes/healthRoutes");
 const serviceRoutes = require("./Routes/serviceRoute");
 const teamRoutes = require("./Routes/teamRoutes");
