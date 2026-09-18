@@ -11,7 +11,7 @@ const { connectDB } = require("./Config/db");
 
 const app = express();
 const cors = require("cors");
-app.use(cors({ origin: "https://verdant-salmiakki-3cb05c.netlify.app/", credentials: true }));
+app.use(cors({ origin: "https://verdant-salmiakki-3cb05c.netlify.app", credentials: true }));
 const PORT = 3000;
 
 
